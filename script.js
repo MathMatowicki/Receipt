@@ -1,41 +1,71 @@
+let receiptData;
+if ((receiptData = window.localStorage["receiptData"])) {
+    receiptData = JSON.parse(receiptData);
+    receiptData.forEach((entry, index) => {
+        // check if entry is a tombstone
+        if (entry && Object.keys(entry).length !== 0) {
+            insertNewRecord(entry, index+1);
+        }
+    })
+} else {
+    receiptData = [];
+}
+
+let updateSum = () => {
+    let sumElement = document.getElementById("receipt-sum");
+    sumElement.innerHTML = receiptData.reduce((a, b) => a + (b.sum? b.sum : 0), 0);
+}
+
+updateSum();
 let selectedRow = null
-let productsList = [];
 function onFormSubmit() {
     let formData = readFormData();
-    if (selectedRow == null)
-        insertNewRecord(formData);
-    else
-        updateRecord(formData);
-    resetForm();
 
+    if (selectedRow == null) {
+        insertNewRecord(formData);
+        receiptData.push(formData);
+    } else {
+        updateRecord(formData);
+        receiptData[+selectedRow.cells[0].innerHTML - 1] = formData;
+    }
+
+    updateSum();
+    resetForm();
+    window.localStorage["receiptData"] = JSON.stringify(receiptData);
 }
 
 function readFormData() {
-    let formData = {};
-    formData["name"] = document.getElementById("name").value;
-    formData["quantity"] = document.getElementById("quantity").value;
-    formData["price"] = document.getElementById("price").value + " zł";
-    formData["sum"] = (parseFloat(document.getElementById("price").value).toFixed(2) * parseFloat(document.getElementById("quantity").value).toFixed(3)).toFixed(2);
-    productsList.push(formData);
-    return formData;
+    let price = +parseFloat(document.getElementById("price").value).toFixed(2);
+    let quantity = +parseFloat(document.getElementById("quantity").value).toFixed(2)
+    return {
+        "name": document.getElementById("name").value,
+        "quantity": quantity,
+        "price": price,
+        "sum": +(price * quantity).toFixed(2),
+    };
 }
 
-function insertNewRecord(data) {
+function insertNewRecord(data, index) {
     let table = document.getElementById("product-list").getElementsByTagName('tbody')[0];
-    let newRow = table.insertRow(table.length);
-    cell0 = newRow.insertCell(0);
-    cell0.innerHTML = productsList.length;
-    cell1 = newRow.insertCell(1);
-    cell1.innerHTML = data.name;
-    cell2 = newRow.insertCell(2);
-    cell2.innerHTML = data.quantity;
-    cell3 = newRow.insertCell(3);
-    cell3.innerHTML = data.price;
-    cell4 = newRow.insertCell(4);
-    cell4.innerHTML = data.sum;
-    cell4 = newRow.insertCell(5);
-    cell4.innerHTML = `<a onClick="onEdit(this)">Edit</a>
-                       <a onClick="onDelete(this)">Delete</a>`;
+    let newRow = table.insertRow();
+
+    let cell = newRow.insertCell(0);
+    cell.innerHTML = (index? index : receiptData.length + 1) + "";
+
+    cell = newRow.insertCell(1);
+    cell.innerHTML = data.name;
+
+    cell = newRow.insertCell(2);
+    cell.innerHTML = data.quantity;
+
+    cell = newRow.insertCell(3);
+    cell.innerHTML = data.price + " zł";
+
+    cell = newRow.insertCell(4);
+    cell.innerHTML = data.sum;
+
+    cell = newRow.insertCell(5);
+    cell.innerHTML = `<a onClick="onEdit(this)">Edit</a>` + `<a onClick="onDelete(this)">Delete</a>`;
 }
 
 function resetForm() {
@@ -52,17 +82,21 @@ function onEdit(td) {
     document.getElementById("quantity").value = selectedRow.cells[2].innerHTML;
     document.getElementById("price").value = selectedRow.cells[3].innerHTML;
 }
+
 function updateRecord(formData) {
     selectedRow.cells[1].innerHTML = formData.name;
     selectedRow.cells[2].innerHTML = formData.quantity;
-    selectedRow.cells[3].innerHTML = formData.price;
+    selectedRow.cells[3].innerHTML = formData.price + " zł";
     selectedRow.cells[4].innerHTML = formData.sum;
 }
 
 function onDelete(td) {
     if (confirm('Are you sure to delete this record ?')) {
-        row = td.parentElement.parentElement;
+        let row = td.parentElement.parentElement;
+        receiptData[+row.cells[0].innerHTML - 1] = {};
+        window.localStorage["receiptData"] = JSON.stringify(receiptData);
         document.getElementById("product-list").deleteRow(row.rowIndex);
+        updateSum();
         resetForm();
     }
 }
