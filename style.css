@@ -49,15 +49,7 @@ form div.form-action-buttons {
 a {
   cursor: pointer;
   text-decoration: underline;
-  color: #0000ee;
+  color: #000;
   margin-right: 4px;
-}
-
-label.validation-error {
-  color: red;
-  margin-left: 5px;
-}
-
-.hide {
-  display: none;
+  font-weight: 900;
 }
