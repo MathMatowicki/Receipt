@@ -31,7 +31,7 @@ function onFormSubmit() {
     } else {
         let id = formData.id = +selectedRow.cells[0].innerHTML;
         updateRecord(formData);
-        receiptData[id - 1] = formData;
+        receiptData[receiptData.findIndex((element) => element.id === id)] = formData;
     }
 
     updateSum();
@@ -99,7 +99,7 @@ function updateRecord(formData) {
 function onDelete(td) {
     if (confirm('Are you sure to delete this record ?')) {
         let row = td.parentElement.parentElement;
-        receiptData[+row.cells[0].innerHTML - 1] = {};
+        receiptData[receiptData.findIndex((element) => element.id === +row.cells[0].innerHTML)] = {};
         window.localStorage["receiptData"] = JSON.stringify(receiptData);
         document.getElementById("product-list").deleteRow(row.rowIndex);
         updateSum();
@@ -109,14 +109,14 @@ function onDelete(td) {
 
 let reorder = (td, direction_up) => {
     let row = td.parentElement.parentElement;
-    let index = row.rowIndex - 1;
-    let sp = index + (direction_up? -1 : 1);
+    let originalPosition = receiptData.findIndex((element) => element.id === +row.cells[0].innerHTML)
+    let sp = originalPosition + (direction_up? -1 : 1);
     for(; sp < receiptData.length && sp >= 0 && is_tombstone(receiptData[sp]); (direction_up? --sp : ++sp)) {}
     // do nothing if there are no non-tombstone elements above/below what we want to move
     if (sp === -1 || sp === receiptData.length) {
         return;
     }
-    receiptData.splice(sp, 0, receiptData.splice(index, 1)[0]);
+    receiptData.splice(sp, 0, receiptData.splice(originalPosition, 1)[0]);
     window.localStorage["receiptData"] = JSON.stringify(receiptData);
     let data = {
         "id": row.cells[0].innerHTML,
@@ -125,6 +125,7 @@ let reorder = (td, direction_up) => {
         "price": parseFloat(row.cells[3].innerHTML),
         "sum": parseFloat(row.cells[4].innerHTML),
     }
-    document.getElementById("product-list").deleteRow(row.rowIndex);
-    insertNewRecord(data, index + (direction_up? -1 : 1));
+    let index = row.rowIndex;
+    document.getElementById("product-list").deleteRow(index);
+    insertNewRecord(data, index + (direction_up? -2 : 0));
 }
