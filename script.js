@@ -1,10 +1,13 @@
+let is_tombstone = (entry) => {
+    return !(entry && Object.keys(entry).length !== 0);
+}
+
 let receiptData;
 if ((receiptData = window.localStorage["receiptData"])) {
     receiptData = JSON.parse(receiptData);
-    receiptData.forEach((entry, index) => {
-        // check if entry is a tombstone
-        if (entry && Object.keys(entry).length !== 0) {
-            insertNewRecord(entry, index+1);
+    receiptData.forEach((entry) => {
+        if (!is_tombstone(entry)) {
+            insertNewRecord(entry);
         }
     })
 } else {
@@ -13,7 +16,7 @@ if ((receiptData = window.localStorage["receiptData"])) {
 
 let updateSum = () => {
     let sumElement = document.getElementById("receipt-sum");
-    sumElement.innerHTML = receiptData.reduce((a, b) => a + (b.sum? b.sum : 0), 0);
+    sumElement.innerHTML = receiptData.reduce((a, b) => a + +(b.sum?? 0), 0) + " zł";
 }
 
 updateSum();
@@ -22,11 +25,13 @@ function onFormSubmit() {
     let formData = readFormData();
 
     if (selectedRow == null) {
+        formData.id = receiptData.length + 1;
         insertNewRecord(formData);
         receiptData.push(formData);
     } else {
+        let id = formData.id = +selectedRow.cells[0].innerHTML;
         updateRecord(formData);
-        receiptData[+selectedRow.cells[0].innerHTML - 1] = formData;
+        receiptData[id - 1] = formData;
     }
 
     updateSum();
@@ -45,12 +50,12 @@ function readFormData() {
     };
 }
 
-function insertNewRecord(data, index) {
+function insertNewRecord(data, rowIndex) {
     let table = document.getElementById("product-list").getElementsByTagName('tbody')[0];
-    let newRow = table.insertRow();
+    let newRow = table.insertRow(rowIndex);
 
     let cell = newRow.insertCell(0);
-    cell.innerHTML = (index? index : receiptData.length + 1) + "";
+    cell.innerHTML = data.id?? (receiptData.length + 1);
 
     cell = newRow.insertCell(1);
     cell.innerHTML = data.name;
@@ -62,10 +67,11 @@ function insertNewRecord(data, index) {
     cell.innerHTML = data.price + " zł";
 
     cell = newRow.insertCell(4);
-    cell.innerHTML = data.sum;
+    cell.innerHTML = data.sum + " zł";
 
     cell = newRow.insertCell(5);
-    cell.innerHTML = `<a onClick="onEdit(this)">Edit</a>` + `<a onClick="onDelete(this)">Delete</a>`;
+    cell.innerHTML = `<a onClick="onEdit(this)">Edit</a>` + `<a onClick="onDelete(this)">Delete</a>` +
+        `<a onClick="reorder(this, 1)">&uarr;</a>` + `<a onClick="reorder(this, 0)">&darr;</a>`;
 }
 
 function resetForm() {
@@ -99,4 +105,26 @@ function onDelete(td) {
         updateSum();
         resetForm();
     }
+}
+
+let reorder = (td, direction_up) => {
+    let row = td.parentElement.parentElement;
+    let index = row.rowIndex - 1;
+    let sp = index + (direction_up? -1 : 1);
+    for(; sp < receiptData.length && sp >= 0 && is_tombstone(receiptData[sp]); (direction_up? --sp : ++sp)) {}
+    // do nothing if there are no non-tombstone elements above/below what we want to move
+    if (sp === -1 || sp === receiptData.length) {
+        return;
+    }
+    receiptData.splice(sp, 0, receiptData.splice(index, 1)[0]);
+    window.localStorage["receiptData"] = JSON.stringify(receiptData);
+    let data = {
+        "id": row.cells[0].innerHTML,
+        "name": row.cells[1].innerHTML,
+        "quantity": row.cells[2].innerHTML,
+        "price": parseFloat(row.cells[3].innerHTML),
+        "sum": parseFloat(row.cells[4].innerHTML),
+    }
+    document.getElementById("product-list").deleteRow(row.rowIndex);
+    insertNewRecord(data, index + (direction_up? -1 : 1));
 }
