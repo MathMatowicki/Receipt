@@ -89,7 +89,7 @@ function updateRecord(formData) {
     selectedRow.cells[1].innerHTML = formData.name;
     selectedRow.cells[2].innerHTML = formData.quantity;
     selectedRow.cells[3].innerHTML = formData.price + " zł";
-    selectedRow.cells[4].innerHTML = formData.sum;
+    selectedRow.cells[4].innerHTML = formData.sum + " zł";
 }
 
 function onDelete(td) {
