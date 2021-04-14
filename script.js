@@ -16,7 +16,7 @@ if ((receiptData = window.localStorage["receiptData"])) {
 
 let updateSum = () => {
     let sumElement = document.getElementById("receipt-sum");
-    sumElement.innerHTML = receiptData.reduce((a, b) => a + +(b.sum?? 0), 0) + " zł";
+    sumElement.innerHTML = receiptData.reduce((a, b) => a + +(b.sum ?? 0), 0) + " zł";
 }
 
 updateSum();
@@ -55,7 +55,7 @@ function insertNewRecord(data, rowIndex) {
     let newRow = table.insertRow(rowIndex);
 
     let cell = newRow.insertCell(0);
-    cell.innerHTML = data.id?? (receiptData.length + 1);
+    cell.innerHTML = data.id ?? (receiptData.length + 1);
 
     cell = newRow.insertCell(1);
     cell.innerHTML = data.name;
@@ -75,10 +75,6 @@ function insertNewRecord(data, rowIndex) {
 }
 
 function resetForm() {
-    // document.getElementById("name").value = "";
-    // document.getElementById("quantity").value = "";
-    // document.getElementById("price").value = "";
-    // document.getElementById("sum").value = "";
     selectedRow = null;
 }
 
@@ -110,8 +106,8 @@ function onDelete(td) {
 let reorder = (td, direction_up) => {
     let row = td.parentElement.parentElement;
     let originalPosition = receiptData.findIndex((element) => element.id === +row.cells[0].innerHTML)
-    let sp = originalPosition + (direction_up? -1 : 1);
-    for(; sp < receiptData.length && sp >= 0 && is_tombstone(receiptData[sp]); (direction_up? --sp : ++sp)) {}
+    let sp = originalPosition + (direction_up ? -1 : 1);
+    for (; sp < receiptData.length && sp >= 0 && is_tombstone(receiptData[sp]); (direction_up ? --sp : ++sp)) { }
     // do nothing if there are no non-tombstone elements above/below what we want to move
     if (sp === -1 || sp === receiptData.length) {
         return;
@@ -127,5 +123,5 @@ let reorder = (td, direction_up) => {
     }
     let index = row.rowIndex;
     document.getElementById("product-list").deleteRow(index);
-    insertNewRecord(data, index + (direction_up? -2 : 0));
+    insertNewRecord(data, index + (direction_up ? -2 : 0));
 }
