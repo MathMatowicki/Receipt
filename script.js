@@ -1,3 +1,4 @@
+/*Projekt wykonali Mateusz Matowicki, Bartosz Wiszowaty */
 let is_tombstone = (entry) => {
     return !(entry && Object.keys(entry).length !== 0);
 }
