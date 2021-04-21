@@ -82,8 +82,8 @@ function resetForm() {
 function onEdit(td) {
     selectedRow = td.parentElement.parentElement;
     document.getElementById("name").value = selectedRow.cells[1].innerHTML;
-    document.getElementById("quantity").value = selectedRow.cells[2].innerHTML;
-    document.getElementById("price").value = selectedRow.cells[3].innerHTML;
+    document.getElementById("quantity").value = selectedRow.cells[2].innerHTML.match(/[+-]?\d+(\.\d+)?/g)[0];
+    document.getElementById("price").value = selectedRow.cells[3].innerHTML.match(/[+-]?\d+(\.\d+)?/g)[0];
 }
 
 function updateRecord(formData) {
