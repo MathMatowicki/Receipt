@@ -12,7 +12,7 @@ if ((receiptData = window.localStorage["receiptData"])) {
 
 let updateGeneratedValues = () => {
     let sumElement = document.getElementById("receipt-sum");
-    sumElement.innerHTML = receiptData.reduce((a, b) => a + +(b.sum ?? 0), 0) + " zł";
+    sumElement.innerHTML = receiptData.reduce((a, b) => a + +(b.sum ?? 0), 0).toFixed(2)  + " zł";
     document.querySelectorAll("#product-list tbody:first-of-type tr").forEach((element, index) => {
         element.cells[0].innerHTML = String(index + 1);
     });
