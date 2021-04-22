@@ -39,7 +39,8 @@
       <tr>
         <td>
           <form
-            onsubmit="event.preventDefault();onFormSubmit();"
+            name="newEntry"
+            onsubmit="event.preventDefault()"
             autocomplete="off"
           >
             <div>
@@ -70,7 +71,8 @@
             </div>
 
             <div class="form-action-buttons">
-              <input type="submit" value="Submit" />
+              <button hidden id="reset-button" onclick="resetForm()">Reset</button>
+              <input type="submit" onclick="onFormSubmit()" value="Submit" />
             </div>
           </form>
         </td>

@@ -31,7 +31,7 @@ input[type="number"] {
   box-sizing: border-box;
 }
 
-input[type="submit"] {
+input[type="submit"], #reset-button {
   width: 30%;
   background-color: #ddd;
   color: #000;
